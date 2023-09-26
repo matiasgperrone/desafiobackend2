@@ -1,3 +1,4 @@
+const { log } = require("console");
 const { promises: fs } = require("fs");
 // CLASE CON CONSTRUCTOR Y ARREGLO VACIO
 
@@ -40,30 +41,55 @@ class ProductManager {
     }
   }
 
-  // EN VEZ DE QUERER HACER TODA LA FUNCION DENTRO DE ESTE LUGAR, ACA HACER EL ESQUELETO NOMAS Y DESPUES INTENTAR EJECUTAR ABAJO
+  async deteleProductByID(id) {
+    try {
+      const products = await getJSONFromFile(this.path);
+      let productsFind = products.find((item) => item.id === id);
+      let index = products.indexOf(productsFind);
+      if (index !== -1) {
+        products.splice(index, 1);
+        await saveJSONToFile(this.path, products);
+        console.log("Producto eliminado. Este es el nuevo arreglo:", products);
+      } else {
+        console.log("no se encuentra el producto");
+      }
+    } catch (error) {
+      console.log("error", error.message);
+    }
+  }
 
-  //   async updateProduct(id) {
-  //     const products = await getJSONFromFile(this.path);
-  //     let productsFind = products.find((item) => item.id === id);
-  //     if (!productsFind) {
-  //       console.log("UPDATEPRODUCT: El producto no se encuentra");
-  //     } else {
-  //       const prod = productsFind;
-  //       await fs.appendFile(prod, content, "utf-8");
-  //       console.log("UPDATEPRODUCT: Producto encontrado: ", productsFind);
-  //     }
-  //   }
-
-  //   async deleteProduct(id) {
-  //     const products = await getJSONFromFile(this.path);
-  //     let productsFind = products.find((item) => item.id === id);
-  //     if (!productsFind) {
-  //       console.log("DELETEPRODUCT: El producto a eliminar no existe");
-  //     } else {
-  //       await fs.unlink();
-  //       console.log("Producto borrado", products);
-  //     }
-  //   }
+  async updateProductByID(
+    id,
+    newTitle,
+    newDescription,
+    newPrice,
+    newThumbnail,
+    newCode,
+    newStock
+  ) {
+    try {
+      const products = await getJSONFromFile(this.path);
+      let productFind = products.find((item) => item.id === id);
+      let index = products.indexOf(productFind);
+      if (index !== -1) {
+        productFind = {
+          title: newTitle,
+          description: newDescription,
+          price: newPrice,
+          thumbnail: newThumbnail,
+          code: newCode,
+          stock: newStock,
+        };
+        products[index] = { id, ...productFind };
+        await saveJSONToFile(this.path, products);
+        console.log("Producto cambiado", products);
+      } else {
+        console.log("no se encuentra el producto");
+      }
+    } catch (error) {
+      console.log("Error en UPDATE", error.message);
+    }
+  }
 }
 
 // UTILITY FUNCTIONS
@@ -95,112 +121,76 @@ const saveJSONToFile = async (path, data) => {
   }
 };
 
-// Prueba de addProduct y getProduct
+// PARA PROBAR CADA UNA DE LAS FUNCIONES LAS APLIQUE POR SEPARADO, POR LO QUE HAY QUE
+// DESCOMENTAR CADA BLOQUE DE CODIGO SEPARADO POR ///////////////////////////////////
+
+// PRUEBA DE ADD Y GET PRODUCT
 
 // const addAndGet = async () => {
 //   try {
 //     const productManager = new ProductManager("./products.json");
 //     await productManager.addProduct({
-//       title: "Producto prueba",
-//       description: "Este es un producto prueba",
-//       price: 200,
-//       thumbnail: "Sin imagen",
-//       code: "abc123",
-//       stock: 25,
+//       title: "Crocs",
+//       description: "Crocs azules",
+//       price: 13400,
+//       thumbnail: "URL de Crocs",
+//       code: 2,
+//       stock: 90,
 //     });
 //     console.log("ADDPRODUCT: Se agregó el producto");
 //     const products = await productManager.getProducts();
 //     console.log("GETPRODUCT: Estos son los productos:", products);
-//     const productdelete = await productManager.deleteProduct(1695495330607);
 //   } catch (error) {
 //     console.error(" Ha ocurrido un error", error.message);
 //   }
 // };
 // addAndGet();
 
-// PRUEBA DE getProductByID con ID 1.
+/////////////////////////////////////////////////////////////////
+
+// PRUEBA DE GET PRODUCT BY ID CON ID 3
 
 // const getProdbyID = async () => {
 //   try {
 //     const productManager = new ProductManager("./products.json");
-//     await productManager.getProductbyID(1);
+//     await productManager.getProductbyID(3);
 //   } catch (error) {
 //     console.log("GETPRODUCTBYID: Ocurrió un error", error.message);
 //   }
 // };
 // getProdbyID();
 
-////////
+/////////////////////////////////////////////////////////////////
 
-// let ProductManager = new ProductManager("./products.json");
+// PRUEBA DE DELETE PRODUCT BY ID CON EL ID 1
 
-// class ProductManager {
-//   constructor() {
-//     this.products = [];
+// const deleteProd = async () => {
+//   try {
+//     const productManager = new ProductManager("./products.json");
+//     await productManager.deteleProductByID(1);
+//   } catch (error) {
+//     console.log("error", error.message);
 //   }
+// };
 
-//   // MÉTODO ADD PRODUCTS
+// deleteProd();
 
-//   addProduct(title, description, price, thumbnail, code, stock) {
-//     let product = this.products.find((item) => item.code === code);
-//     if (!product) {
-//       this.products.push({
-//         id: this.products.length + 1,
-//         title,
-//         description,
-//         price,
-//         thumbnail,
-//         code,
-//         stock,
-//       });
-//       console.log("Producto agregado");
-//     } else {
-//       console.log("El producto ya se encuentra en la lista.");
-//     }
-//   }
+/////////////////////////////////////////////////////////////////
 
-//   // MÉTODO GET PRODUCTS
+// PRUEBA DE UPDATE PRODUCT BY ID CON EL PRODUCTO ID 2
 
-//   getProducts() {
-//     return this.products;
-//   }
+// const updateProd = async () => {
+//   const productManager = new ProductManager("./products.json");
+//   await productManager.updateProductByID(
+//     2,
+//     "Zapatillas",
+//     "Zapatillas Nike",
+//     35000,
+//     "URL de Nike",
+//     20,
+//     2
+//   );
+// };
+// updateProd();
 
-//   // MÉTODO GET PRODUCTS BY ID
-
-// // PROBANDO LOS MÉTODOS
-
-// let productManager = new ProductManager();
-
-// // OBTENEMOS EL ARREGLO INICIAL VACIO
-
-// console.log("getProducts", productManager.getProducts());
-
-// // AGREGAMOS UN PRODUCTO COMO PRUEBA
-
-// productManager.addProduct(
-//   "Zapatillas",
-//   "Prueba",
-//   50000,
-//   "Aca va una imagen",
-//   10,
-//   5
-// );
-
-// // VEMOS EL ARREGLO CON EL NUEVO PRODUCTO
-
-// console.log(productManager.getProducts());
-
-// // QUEREMOS AGREGAR UN PRODUCTO CON IGUAL CODE
-
-// productManager.addProduct(
-//   "Zapatillas",
-//   "Prueba",
-//   50000,
-//   "Aca va una imagen",
-//   10,
-//   5
-// );
-
-// // OBTENEMOS UN PRODUCTO POR SU ID
-
-// productManager.getProductByID(1);
+/////////
